@@ -1,19 +1,17 @@
 <?php
 namespace backend\controllers;
 
+use common\models\user\form\LoginPasswordForm;
 use Yii;
-use yii\web\Controller;
-use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use common\models\LoginForm;
 
 /**
  * Site controller
  */
-class SiteController extends Controller
+class SiteController extends BasicController
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function behaviors()
     {
@@ -32,17 +30,11 @@ class SiteController extends Controller
                     ],
                 ],
             ],
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'logout' => ['post'],
-                ],
-            ],
         ];
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function actions()
     {
@@ -74,16 +66,16 @@ class SiteController extends Controller
             return $this->goHome();
         }
 
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
-        } else {
-            $model->password = '';
+        $model = new LoginPasswordForm();
+        if ($model->load(Yii::$app->request->post())) {
+            $model->afterLoad();
+            if ($model->basicLogin()) {
 
-            return $this->render('login', [
-                'model' => $model,
-            ]);
+                return $this->goBack();
+            }
+
         }
+        return $this->render('login', ['model' => $model]);
     }
 
     /**
